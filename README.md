@@ -1,8 +1,15 @@
 ### A Python tkinter interface for ollama LLM queries.
-* Features include real time memory and cpu plotting, a code-only button, and a paste button.
-* requires docker desktop, Windows
+* Features include real time memory and cpu plotting, a code-only button, a context length counter, and a paste button.
+* Requires docker desktop, Windows
 
 NO models are committed here!  You can obtain them from https://ollama.com/search
+
+To download the repository, use:
+```
+git clone https://github.com/onigiri63/pyllm.git
+cd pyllm
+```
+
 
 To create a container from a model, first follow these instructions:
 
