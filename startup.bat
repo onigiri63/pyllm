@@ -1,1 +1,1 @@
-python M:\Jeff_Shikany\ollama\p2.py
+python <pyllm directory>/driver.py
