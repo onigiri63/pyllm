@@ -60,15 +60,15 @@ FOR NOW, you can add the model to the tuple at the beginning of driver.py, in th
 ```
       model = (<model name>,<file name>,<context length>)
 ```
--The model name is the name from the ollama models website
--The file name is the name you gave the file in createContainerImg.bat
--The context length is the value obtained from the details when you click the model on the ollama website. 
+* The model name is the name from the ollama models website
+* The file name is the name you gave the file in createContainerImg.bat
+* The context length is the value obtained from the details when you click the model on the ollama website. 
 
-```
+
  TODO: 
-    -add a dropdown to select the model to run
-    -minimize graphs properly when you minimize the application
-    -can we stop the prompt? (interrupt the subprocess)
-    -labels for the graphs
-    -can we do more to automate the container setup?
-```
+* add a dropdown to select the model to run
+* minimize graphs properly when you minimize the application
+* can we stop the prompt? (interrupt the subprocess)
+* labels for the graphs
+* can we do more to automate the container setup?
+
