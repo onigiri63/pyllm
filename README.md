@@ -1,6 +1,6 @@
 ### A Python tkinter interface for ollama LLM queries.
 * Features include real time memory and cpu plotting, a code-only button, a context length counter, and a paste button.
-* Requires docker desktop, Windows
+* Requires docker desktop, Windows, Python
 
 NO models are committed here!  You can obtain them from https://ollama.com/search
 
