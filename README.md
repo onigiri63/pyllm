@@ -1,16 +1,17 @@
-A tkinter interface for ollama LLM queries. features include real time memory and cpu plotting, a code-only button, and a paste button.
-REQUIREMENTS: docker desktop
+### A Python tkinter interface for ollama LLM queries.
+* Features include real time memory and cpu plotting, a code-only button, and a paste button.
+* requires docker desktop, Windows
 
 NO models are committed here!  You can obtain them from https://ollama.com/search
 
-to create a container, first follow these instructions:
+To create a container from a model, first follow these instructions:
 
-run aihelper in detached mode, take note of container id
+Run aihelper in detached mode, take note of container id
 ```
 docker run -p 11434:11434 -d ailtire/aihelper:llama3.2
 ```
 
-grab container id and copy the certificate into the container
+Grab container id and copy the certificate into the container
 ```
 docker ps 
 docker cp certificate.crt ${container_id}:/usr/local/share/ca-certificates/
@@ -57,4 +58,5 @@ where the model name is the name from the ollama models website, the file name i
     -minimize graphs properly when you minimize the application
     -can we stop the prompt? (interrupt the subprocess)
     -labels for the graphs
+    -can we do more to automate the container setup?
 ```
