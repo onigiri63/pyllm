@@ -6,13 +6,13 @@ NO models are committed here!  You can obtain them from https://ollama.com/searc
 
 
 
-## first download the repository:
+## Download the repository:
 ```
 git clone https://github.com/onigiri63/pyllm.git
 cd pyllm
 ```
 
-## First install the python requirements
+## Install the python requirements
 ```
 pip install -r requirements.txt
 ```
