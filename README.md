@@ -54,7 +54,7 @@ where the model name is the name from the ollama models website, the file name i
 ```
  TODO: 
     -add a dropdown to select the model to run
-    -minimze graphs properly on applicaion minimize
+    -minimize graphs properly when you minimize the application
     -can we stop the prompt? (interrupt the subprocess)
     -labels for the graphs
 ```
