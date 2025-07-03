@@ -4,14 +4,20 @@
 
 NO models are committed here!  You can obtain them from https://ollama.com/search
 
-To download the repository, use:
+
+
+## first download the repository:
 ```
 git clone https://github.com/onigiri63/pyllm.git
 cd pyllm
 ```
 
+## First install the python requirements
+```
+pip install -r requirements.txt
+```
 
-To create a container from a model, first follow these instructions:
+## To create a container from a model, first follow these instructions:
 
 Run aihelper in detached mode, take note of container id
 ```
@@ -44,7 +50,7 @@ On windows wsl Docker, container logs are stored in
 "\\wsl.localhost\docker-desktop\tmp\docker-desktop-root\var\lib\docker\containers\"
 ```
 
-The following commands will load your container with your chosen model
+## The following commands will load your container with your chosen model
 ```
 docker restart ${container_id}
 docker exec -u root -t -i ${container_id} /bin/bash
