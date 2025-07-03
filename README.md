@@ -4,6 +4,13 @@
 
 NO models are committed here!  You can obtain them from https://ollama.com/search
 
+To download the repository, use:
+```
+git clone https://github.com/onigiri63/pyllm.git
+cd pyllm
+```
+
+
 To create a container from a model, first follow these instructions:
 
 Run aihelper in detached mode, take note of container id
