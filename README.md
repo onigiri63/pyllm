@@ -17,6 +17,11 @@ cd pyllm
 pip install -r requirements.txt
 ```
 
+### Run the program
+```
+python driver.py
+```
+### To change the model, do the following:
 ### Run the container using the model llama3.2:
 
 Run aihelper in detached mode, take note of container id
@@ -27,7 +32,6 @@ docker run -p 11434:11434 -d ailtire/aihelper:llama3.2
 ```
 docker run --gpus all --cpus 22 -p 11434:11434 -t ailtire/aihelper:llama3.2 nvidia-smi
 ```
-
 
 ### To use a different model:
 
@@ -72,4 +76,4 @@ FOR NOW, you can add the model to the tuple at the beginning of driver.py, in th
 * can we stop the prompt? (interrupt the subprocess)
 * labels for the graphs
 * can we do more to automate the container setup?
-
+* automate the process of creating images with new models
