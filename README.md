@@ -17,12 +17,14 @@ cd pyllm
 pip install -r requirements.txt
 ```
 
-## To create a container from a model, first follow these instructions:
+## Run the container using the model llama3.2:
 
 Run aihelper in detached mode, take note of container id
 ```
 docker run -p 11434:11434 -d ailtire/aihelper:llama3.2
 ```
+
+## To use a different model:
 
 Grab container id and copy the certificate into the container
 ```
@@ -43,11 +45,6 @@ update-ca-certificates
 Optional (enable gpu resources access)
 ```
 docker run --gpus all --cpus 22 -p 11434:11434 -t ailtire/aihelper:llama3.2 nvidia-smi
-```
-
-On windows wsl Docker, container logs are stored in 
-```
-"\\wsl.localhost\docker-desktop\tmp\docker-desktop-root\var\lib\docker\containers\"
 ```
 
 ## The following commands will load your container with your chosen model
