@@ -1,4 +1,4 @@
-### A Python tkinter interface for ollama LLM queries.
+## A Python tkinter interface for ollama LLM queries.
 * Features include real time memory and cpu plotting, a code-only button, a context length counter, and a paste button.
 * Requires docker desktop, Windows, Python
 
@@ -6,25 +6,30 @@ NO models are committed here!  You can obtain them from https://ollama.com/searc
 
 
 
-## Download the repository:
+### Download the repository:
 ```
 git clone https://github.com/onigiri63/pyllm.git
 cd pyllm
 ```
 
-## Install the python requirements
+### Install the python requirements
 ```
 pip install -r requirements.txt
 ```
 
-## Run the container using the model llama3.2:
+### Run the container using the model llama3.2:
 
 Run aihelper in detached mode, take note of container id
 ```
 docker run -p 11434:11434 -d ailtire/aihelper:llama3.2
 ```
+#### Optional (enable gpu resources access)
+```
+docker run --gpus all --cpus 22 -p 11434:11434 -t ailtire/aihelper:llama3.2 nvidia-smi
+```
 
-## To use a different model:
+
+### To use a different model:
 
 Grab container id and copy the certificate into the container
 ```
@@ -42,12 +47,8 @@ Refresh the certificate store
 update-ca-certificates
 ```
 
-Optional (enable gpu resources access)
-```
-docker run --gpus all --cpus 22 -p 11434:11434 -t ailtire/aihelper:llama3.2 nvidia-smi
-```
 
-## The following commands will load your container with your chosen model
+### The following commands will load your container with your chosen model
 ```
 docker restart ${container_id}
 docker exec -u root -t -i ${container_id} /bin/bash
