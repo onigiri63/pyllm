@@ -72,8 +72,6 @@ FOR NOW, you can add the model to the tuple at the beginning of driver.py, in th
 
  TODO: 
 * add a dropdown to select the model to run
-* minimize graphs properly when you minimize the application
 * can we stop the prompt? (interrupt the subprocess)
-* labels for the graphs
 * can we do more to automate the container setup?
 * automate the process of creating images with new models
