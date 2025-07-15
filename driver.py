@@ -8,15 +8,11 @@ from PIL import Image, ImageDraw, ImageFont
 import time
 from runFromFile import runFromFile
 from pyperclip import copy
-from tkinter import messagebox
 # from markup import CodeSyntaxHighlighter
 
 '''
  TODO: 
     -add a dropdown to select the model to run
-    -minimze graphs properly on applicaion minimize
-    -can we stop the prompt? (interrupt the subprocess)
-
 '''
 # format: file name, model name, context window size
 # model = ('qwen2.5coder','qwen2.5-coder:7b', '2048')
@@ -31,7 +27,6 @@ class LLMQueryUI:
         self.breakout = [False]
         self.onlyCode = False
         self.minimized = False
-        self.colorIter = 0
         self.query = llmQuery(model)
         self.initControls()
 
@@ -61,8 +56,6 @@ class LLMQueryUI:
         self.memplot.maximize()
 
     def stopLLM(self):
-        # thread = threading.Thread(target=self.runQuery,args=(['[halt]', self.callback]))
-        # thread.start()
         self.query.stopGeneration()
 
     def initControls(self):
@@ -78,25 +71,24 @@ class LLMQueryUI:
         self.entry.pack(pady=0, anchor=tk.NW)
         self.events.append((self.customfont,self.entry))
         
-        self.frame = tk.Frame(self.root)
-        self.frame.pack(padx=20, pady=0, fill=tk.BOTH, expand=True)
-        self.button_frame = tk.Frame(self.frame)
-        self.button_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=20)
+        self.frame = tk.Frame(self.root, height=1)
+        self.frame.pack(padx=0, pady=0, fill=tk.BOTH, anchor=tk.NW)
+        self.button_frame = tk.Frame(self.frame, relief=tk.RIDGE, height=1)
+        self.button_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=0)
 
         self.runButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Run Query", font=("Courier", 10), command=self.on_button_click)
         self.runButton.grid(row=0, column=0, sticky="nsew")
         self.stopButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Stop Query", font=("Courier", 10), command=self.stopLLM)
         self.stopButton.grid(row=0, column=1, sticky="nsew")
-        self.codeButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="CODE", font=("Courier", 10), command=self.codeOnly)
+        self.codeButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="CODE OFF", font=("Courier", 10), command=self.codeOnly)
         self.codeButton.grid(row=0, column=2, sticky="nsew")
         self.copyButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Paste Buffer", font=("Courier", 10), command=self.copyCode)
         self.copyButton.grid(row=0, column=3, sticky="nsew")
-       
         self.countLabel = tk.Label(self.button_frame, font=("Courier", 10), height=1, text="context length: 0")
         self.countLabel.grid(row=0, column=4, sticky="nsew")
 
-        self.output_text = scrolledtext.ScrolledText(self.root, width=100, height=25, wrap=tk.WORD, font=("Courier", 10))
-        self.output_text.pack(pady=0, anchor=tk.NW)
+        self.output_text = scrolledtext.ScrolledText(self.root, width=100, height=27, wrap=tk.WORD, font=("Courier", 10))
+        self.output_text.pack(pady=0, anchor=tk.NW, fill=tk.Y, expand=True)
         self.events.append( (self.customfont, self.output_text))
         
         cpuoffsetX = 600
@@ -115,7 +107,7 @@ class LLMQueryUI:
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.onclosing(self.onclosing(self.breakout)))
 
         resizeThread = threading.Thread(target=self.on_configure )
-        resizeThread.daemon = True  # Ensure the thread exits when the main program exits
+        resizeThread.daemon = True
         resizeThread.start()
 
         run = runFromFile(model)
@@ -200,10 +192,10 @@ class LLMQueryUI:
     def tokenCounterThread(self, callback):
         while not self.breakout[0]:
             q = llmQuery(model)
-            q.setQueryHeader(self.onlyCode)
+            headerCount = len(q.setQueryHeader(self.onlyCode))
             try:
                 user_input = self.entry.get("1.0",tk.END)
-                count = str(q.get_context_length(user_input))
+                count = str(q.get_context_length(user_input) + headerCount) 
                 callback(count)
             except:
                 pass

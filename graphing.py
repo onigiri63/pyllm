@@ -46,9 +46,11 @@ class DynamicPlot(tk.Tk):
         
         if(str(self.mytitle).find('CPU') > -1):
             thread = threading.Thread(target=self.CPUUsageThread)
+            thread.daemon = True 
             thread.start()
         else:
             thread = threading.Thread(target=self.memUsageThread)
+            thread.daemon = True 
             thread.start()
         self.minimize_event = threading.Event()
 
@@ -133,7 +135,6 @@ class DynamicPlot(tk.Tk):
             y_vals = self.data
             self.plot.set_data(x_vals, y_vals)
             self.plot.set_color(color_map.get(int(self.incoming // 25 * 25), 'red'))
-            # self.plot.set_color(color_map.get(int(self.incoming // 25 * 25), 'red'))
             self.ax.relim()
             self.ax.autoscale_view()
             self.canvas.draw()

@@ -99,12 +99,13 @@ class llmQuery():
     
     def setQueryHeader(self, useHeader):
         if useHeader:
-            self.queryHeader = '\n\nNow check the query above.  if it is a proper coding generation query, the output must be ONLY raw code,' \
-            ' with NO descriptions, headers, footers, or any extra text.  The code should be pasteable into a file without any alteration.' \
-            ' if it is NOT a code generator, respond with \"if you intended to make a NON CODING query, please unselect the \"Code only\"' \
-            ' button.'
+            self.queryHeader = '\n\nNow check the query above.  if it is a proper coding generation query, ALL GENERATED OUTPUT must be ONLY raw code,' \
+            ' with NO descriptions, headers, footers, or any extra text.  The entire generated output should be pasteable into a file without any alteration.' \
+            ' if the query is NOT a code generator, respond with \"if you intended to make a NON CODING query, please unselect the \"Code only\"' \
+            ' button.\"'
         else:
             self.queryHeader = ''
+        return self.queryHeader
 
     def stopGeneration(self):
         self.process.terminate()
@@ -121,10 +122,10 @@ class llmQuery():
         self.process = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,  # Optional: merge stderr into stdout
-        text=True,                # Ensures strings are returned, bytes
-        bufsize=1,             # Line-buffered
-        universal_newlines=True   # Alias for text=True, ensures line endings handled properly    )
+        stderr=subprocess.STDOUT,   # Optional: merge stderr into stdout
+        text=True,                  # Ensures strings are returned, bytes
+        bufsize=1,                  # Line-buffered
+        universal_newlines=True     # Alias for text=True, ensures line endings handled properly
         )
         self.queryInProgress = True
         buffer = ''
@@ -157,4 +158,3 @@ class llmQuery():
         self.process.stdout.close
         self.process.wait()
         self.queryInProgress = False
-
