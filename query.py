@@ -11,6 +11,7 @@ url = 'http://localhost:11434/api/generate'
 class llmQuery():
 
     model = ''
+    process = any
 
     def __init__(self, model):
         self.model = model
@@ -105,6 +106,10 @@ class llmQuery():
         else:
             self.queryHeader = ''
 
+    def stopGeneration(self):
+        self.process.terminate()
+        self.process.stdout.close()
+
     def query_llm(self, payload, callback):
         data = {
             "model": self.model[1],
@@ -113,7 +118,7 @@ class llmQuery():
         }
 
         cmd = ['curl', url, '-d',json.dumps(data), '--no-progress-meter']
-        process = subprocess.Popen(
+        self.process = subprocess.Popen(
         cmd,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,  # Optional: merge stderr into stdout
@@ -123,29 +128,33 @@ class llmQuery():
         )
         self.queryInProgress = True
         buffer = ''
-        for line in process.stdout:
-            line = line.strip()
-            if not line or (not '{' in line and not '}' in line):
-                continue
-            try:
-                parsed = json.loads(line)
-                if 'done' in parsed:
-                    if parsed['done'] == 'true':
-                        break
-                if 'response' in parsed:
-                    callback(parsed['response'])
-            except json.JSONDecodeError as e:
-                buffer += line
+        try:
+            for line in self.process.stdout:
+                line = line.strip()
+                if not line or (not '{' in line and not '}' in line):
+                    continue
                 try:
-                    parsed = json.loads(buffer)
+                    parsed = json.loads(line)
+                    if 'done' in parsed:
+                        if parsed['done'] == 'true':
+                            break
                     if 'response' in parsed:
                         callback(parsed['response'])
-                        buffer = ''
                 except json.JSONDecodeError as e:
-                    pass
+                    buffer += line
+                    try:
+                        parsed = json.loads(buffer)
+                        if 'response' in parsed:
+                            callback(parsed['response'])
+                            buffer = ''
+                    except json.JSONDecodeError as e:
+                        pass
+                time.sleep(.1)
+        except:
+            0
             time.sleep(.1)
                 
-        process.stdout.close
-        process.wait()
+        self.process.stdout.close
+        self.process.wait()
         self.queryInProgress = False
 

@@ -32,6 +32,7 @@ class LLMQueryUI:
         self.onlyCode = False
         self.minimized = False
         self.colorIter = 0
+        self.query = llmQuery(model)
         self.initControls()
 
     def on_configure(self):
@@ -59,6 +60,11 @@ class LLMQueryUI:
         self.cpuplot.maximize()
         self.memplot.maximize()
 
+    def stopLLM(self):
+        # thread = threading.Thread(target=self.runQuery,args=(['[halt]', self.callback]))
+        # thread.start()
+        self.query.stopGeneration()
+
     def initControls(self):
         self.root = tk.Tk()
         # self.root.iconbitmap("iconTemplate@2x.gif")  # Set the icon for the window
@@ -77,14 +83,17 @@ class LLMQueryUI:
         self.button_frame = tk.Frame(self.frame)
         self.button_frame.grid(row=1, column=0, columnspan=2, padx=10, pady=20)
 
-        self.runButton = tk.Button(self.button_frame, bg="snow3", width=20, height=1, text="Run Query", font=("Courier", 10), command=self.on_button_click)
+        self.runButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Run Query", font=("Courier", 10), command=self.on_button_click)
         self.runButton.grid(row=0, column=0, sticky="nsew")
-        self.codeButton = tk.Button(self.button_frame, bg="snow3", width=20, height=1, text="CODE", font=("Courier", 10), command=self.codeOnly)
-        self.codeButton.grid(row=0, column=1, sticky="nsew")
-        self.copyButton = tk.Button(self.button_frame, bg="snow3", width=20, height=1, text="Paste Buffer", font=("Courier", 10), command=self.copyCode)
-        self.copyButton.grid(row=0, column=2, sticky="nsew")
+        self.stopButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Stop Query", font=("Courier", 10), command=self.stopLLM)
+        self.stopButton.grid(row=0, column=1, sticky="nsew")
+        self.codeButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="CODE", font=("Courier", 10), command=self.codeOnly)
+        self.codeButton.grid(row=0, column=2, sticky="nsew")
+        self.copyButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Paste Buffer", font=("Courier", 10), command=self.copyCode)
+        self.copyButton.grid(row=0, column=3, sticky="nsew")
+       
         self.countLabel = tk.Label(self.button_frame, font=("Courier", 10), height=1, text="context length: 0")
-        self.countLabel.grid(row=0, column=3, sticky="nsew")
+        self.countLabel.grid(row=0, column=4, sticky="nsew")
 
         self.output_text = scrolledtext.ScrolledText(self.root, width=100, height=25, wrap=tk.WORD, font=("Courier", 10))
         self.output_text.pack(pady=0, anchor=tk.NW)
@@ -122,10 +131,10 @@ class LLMQueryUI:
 
     def runQuery(self, user_input, callback):
         self.output_text.delete(1.0, tk.END)  # Clear any text
-        q = llmQuery(model)
-        q.setQueryHeader(self.onlyCode)
+        self.query = llmQuery(model)
+        self.query.setQueryHeader(self.onlyCode)
         self.runButton.config(bg="green", text="Query In Progress")
-        thread = threading.Thread(target=q.query_llm,args=([user_input.strip(), callback]))
+        thread = threading.Thread(target=self.query.query_llm,args=([user_input.strip(), callback]))
         thread.start()
         thread.join()
         self.runButton.config(bg="snow3", text="Run Query")
