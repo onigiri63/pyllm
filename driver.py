@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw, ImageFont
 import time
 from runFromFile import runFromFile
 from pyperclip import copy
+from tkinter import messagebox
 # from markup import CodeSyntaxHighlighter
 
 '''
@@ -23,14 +24,40 @@ from pyperclip import copy
 # model = ('qwen2-32k','qwen2-32k', '2048')
 model = ('llama3.2_32k','llama3.2_32k', '16384')
 
-
 class LLMQueryUI:
     onlyCode = False
     def __init__(self):
         self.events = []
         self.breakout = [False]
         self.onlyCode = False
+        self.minimized = False
+        self.colorIter = 0
         self.initControls()
+
+    def on_configure(self):
+        while True:
+            state = self.root.state()
+            if state == "iconic":  # Minimized
+                self.minimize()
+            elif state == "zoomed":  # Maximized
+                self.maximize()
+            elif state == "normal":  # Restored
+                self.maximize()
+            time.sleep(.1)
+
+    def minimize(self):
+        if self.minimized:
+            return
+        self.minimized = True
+        self.cpuplot.minimize()
+        self.memplot.minimize()
+    
+    def maximize(self):
+        if not self.minimized:
+            return
+        self.minimized = False
+        self.cpuplot.maximize()
+        self.memplot.maximize()
 
     def initControls(self):
         self.root = tk.Tk()
@@ -77,6 +104,10 @@ class LLMQueryUI:
     
         self.root.bind("<Configure>", lambda event:self.bindResize(event))
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.onclosing(self.onclosing(self.breakout)))
+
+        resizeThread = threading.Thread(target=self.on_configure )
+        resizeThread.daemon = True  # Ensure the thread exits when the main program exits
+        resizeThread.start()
 
         run = runFromFile(model)
         run.launch()

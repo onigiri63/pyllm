@@ -1,3 +1,4 @@
+from time import time
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
@@ -8,10 +9,11 @@ import threading
 import psutil
 import math
 
-graph_update_rate = 1  # seconds per update
 
 class DynamicPlot(tk.Tk):
+    graph_update_rate = .1  # seconds per update
     newDataReady = False
+    minimize_event = threading.Event
     def __init__(self, title, miny, minx, offsetX, offsetY, root, breakout: list):
         super().__init__()
         self.breakout = breakout
@@ -27,47 +29,53 @@ class DynamicPlot(tk.Tk):
             self.root = root
         except ValueError :
             print(f'Error: calling dynamic plot function')
+        self.incoming = 0
 
         fig, ax = plt.subplots()
-        self.canvas = FigureCanvasTkAgg(fig, master=self)
-        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-        
         self.data = np.zeros(50)  # Initial data array with 50 zeros
         self.plot, = ax.plot(self.data)
-        # self.plot_label = tk.Label(self, text=title, font=("Courier", 10))
-        # self.plot_label.pack(side=tk.BOTTOM, fill=tk.X)
         tk.Label(self, font=("Courier", 12), text=title).pack(pady=5)
         ax.set_ylim(minY, maxY)
-        self.incoming = 0
+        
+        self.canvas = FigureCanvasTkAgg(fig, master=self)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
         
         self.ax = ax
         self.cid = fig.canvas.mpl_connect('draw_event', self.draw)
         self.overrideredirect(True)  # Remove window decorations
         
-        self.update_data()
         if(str(self.mytitle).find('CPU') > -1):
             thread = threading.Thread(target=self.CPUUsageThread)
             thread.start()
         else:
             thread = threading.Thread(target=self.memUsageThread)
             thread.start()
+        self.minimize_event = threading.Event()
+
+        self.update_data()
+
+    def minimize(self):
+        self.minimize_event.set()
+
+    def maximize(self):
+        self.minimize_event.clear()
 
     def CPUUsageThread(self):
         event = threading.Event()
         while not self.breakout[0]:
-            value = psutil.cpu_percent(interval=graph_update_rate, percpu=False)
+            value = psutil.cpu_percent(interval=self.graph_update_rate, percpu=False)
             if value < 0:
                 pass
             else:    
                 self.addPoint(value)
-            event.wait(graph_update_rate)
+            event.wait(self.graph_update_rate)
 
     def memUsageThread(self):
         event = threading.Event()
         while not self.breakout[0]:
             memusage = self.get_memory_info()['Usage %']
             self.addPoint(memusage)
-            event.wait(graph_update_rate)
+            event.wait(self.graph_update_rate)
 
     def get_memory_info(self):
         # Retrieve information about memory usage
@@ -104,6 +112,7 @@ class DynamicPlot(tk.Tk):
         return color_arr
     
     def update_data(self):
+        self.onResize()
         if self.newDataReady:
             color_map = {
                 0: '#22ff00',
@@ -130,7 +139,7 @@ class DynamicPlot(tk.Tk):
             self.canvas.draw()
         
         # Schedule the next update
-        self.after(int(graph_update_rate * 1000), self.update_data)  # Update every 100ms
+        self.after(int(self.graph_update_rate * 1000), self.update_data)  # Update every 100ms
 
     def addPoint(self, incoming):
         self.incoming = incoming
@@ -146,4 +155,13 @@ class DynamicPlot(tk.Tk):
             self.geometry(f"{width}x{height}+{x}+{y}")
 
         self.root.after(0, reposition)
+
+    def onResize(self):
+        if self.minimize_event.is_set():
+            self.canvas.get_tk_widget().pack_forget()
+            self.withdraw()
+        else:
+            self.deiconify()
+            self.lift()
+            self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
             

@@ -3,5 +3,6 @@
 /build
 /dist
 /models
+/tools
 /__pycache__
-startup.bat
+/startup.bat
