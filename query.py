@@ -5,7 +5,7 @@ import os
 import tiktoken
 import time
 
-response_path = f'C:\\Users\\shika001\\Documents\\llm\\responses'
+response_path = f'%USERPROFILE%\\Documents\\llm\\responses'
 url = 'http://localhost:11434/api/generate'
 
 class llmQuery():

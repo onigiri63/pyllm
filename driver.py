@@ -1,16 +1,13 @@
-import subprocess
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
 from graphing import DynamicPlot
 import sys
 from query import llmQuery
-from PIL import Image, ImageDraw, ImageFont
+import helpers
 import time
 from runFromFile import runFromFile
 from pyperclip import copy
-import docker
-
 # from markup import CodeSyntaxHighlighter
 
 '''
@@ -26,59 +23,15 @@ model = ('llama3.2_32k','llama3.2_32k', '16384')
 class LLMQueryUI:
     onlyCode = False
     def __init__(self):
-        self.check_docker_engine()
+        helpers.check_docker_engine()
         self.events = []
         self.breakout = [False]
         self.onlyCode = False
         self.minimized = False
         self.query = llmQuery(model)
         self.initControls()
-
-    def blockForDocker(self):
-        while True:
-            try:
-                # Use 'docker ps -a' command to list all containers, including stopped ones
-                output = subprocess.check_output(['docker', 'ps', '-a'])
-                
-                # If the command is successful and returns a non-empty output, then Docker daemon is running
-                if 'CONTAINER ID' in output.decode('utf-8'):
-                    print("Docker daemon is running.")
-                    return True
-                
-                # If an error occurs or no output is returned, Docker daemon is not running
-                else:
-                    time.sleep(1)  # Wait before retrying
-                    continue
-        
-            except subprocess.CalledProcessError as e:
-                time.sleep(1)  # Wait before retrying
-                continue
-
-            except Exception as e:
-                time.sleep(1)  # Wait before retrying
-                continue
-
-    def check_docker_engine(self):
-        try:
-            print("Checking docker engine")
-            client = docker.from_env()
-            return True
-        except Exception as e:
-            print(f"Docker engine is not running, starting...")
-            self.startDockerEngine()
-            return False
-        
-    def startDockerEngine(self):
-         # Run the executable
-        result = subprocess.run([f'%PROGRAMFILES%\\Docker\\Docker\\Docker Desktop.exe', '-D'], shell=True)
-        self.blockForDocker()
-
-        # Check if the return code is 0 (success)
-        if result.returncode == 0:
-            print("Docker engine launched!")
-        else:
-            print(f"Error running docker, you must have docker engine installed to run this program.")
-            exit()
+        runFromFile(model).launch()
+        self.root.mainloop()
 
     def minimize(self):
         if self.minimized:
@@ -149,15 +102,10 @@ class LLMQueryUI:
         resizeThread.daemon = True
         resizeThread.start()
 
-        run = runFromFile(model)
-        run.launch()
-        # Start the GUI event loop
-        self.root.mainloop()
-
     def on_button_click(self):
         # Reading the text from the input field
         user_input = self.entry.get("1.0",tk.END)
-        thread = threading.Thread(target=self.runQuery,args=([user_input, self.callback]))
+        thread = threading.Thread(target=self.runQuery,args=([user_input, self.responseCallback]))
         thread.start()
 
     def runQuery(self, user_input, callback):
@@ -170,7 +118,7 @@ class LLMQueryUI:
         thread.join()
         self.runButton.config(bg="snow3", text="Run Query")
         
-    def callback(self, responses):
+    def responseCallback(self, responses):
         self.output_text.insert(tk.END, responses) 
         self.output_text.see(index=tk.END)
 
@@ -188,25 +136,9 @@ class LLMQueryUI:
         except Exception as e:
             print(f"Error during closing: {e}")
 
-    def get_font_dims(self, font):
-        # Create an image with a blank white background
-        width, height = 100, 100
-        img = Image.new("RGB", (width, height), "white")
-        draw = ImageDraw.Draw(img)
-
-        # Load the font and measure its size
-        pil_font = ImageFont.truetype("cour.ttf", font["size"])
-
-        # Use textbbox to get the bounding box
-        bbox = draw.textbbox((0, 0), "A", font=pil_font)
-        text_width = bbox[2] - bbox[0]
-        text_height = bbox[3] - bbox[1]
-
-        return (text_width, text_height)
-
     def resize_textboxes(self, font, control):
-        text_width = int( (self.root.winfo_width() - 250) / (self.get_font_dims(font)[0] + 2) )
-        text_height = int( self.root.winfo_height() / (6 * self.get_font_dims(font)[1]) )
+        text_width = int( (self.root.winfo_width() - 250) / (helpers.get_font_dims(font)[0] + 2) )
+        text_height = int( self.root.winfo_height() / (6 * helpers.get_font_dims(font)[1]) )
         
         control.config(width=text_width, height=text_height)
 
