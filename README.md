@@ -85,6 +85,7 @@ FOR NOW, you can add the model to the tuple at the beginning of driver.py, in th
 
 
  TODO: 
+* add the option for interactive chat vs individual prompts
 * add a dropdown to select the model to run
 * can we do more to automate the container setup?
 * automate the process of creating images with new models
