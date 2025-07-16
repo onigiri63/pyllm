@@ -45,31 +45,6 @@ class llmQuery():
         f = open(fullPath, 'w')
         f.write(response)
         f.close()
-        
-    def count_tokens(self, text):
-        # Initialize the tokenizer with the appropriate name
-        enc = tiktoken.get_encoding("cl100k_base")
-        
-        # Encode the input text into tokens
-        tokens = enc.encode(text)
-        
-        # Return the number of tokens
-        return len(tokens)
-
-    def estimate_token_count(self, text: str) -> int:
-        """
-        Approximate token count by splitting on whitespace and punctuation.
-        This is NOT an exact LLM tokenizer, but works without dependencies.
-
-        Parameters:
-            text (str): The input string.
-
-        Returns:
-            int: Estimated number of tokens.
-        """
-        # Split on words and punctuation (approximate GPT-like token behavior)
-        tokens = re.findall(r"\w+|[^\w\s]", text, re.UNICODE)
-        return len(tokens)
 
     def get_context_length(self, prompt, model_name="gpt-3.5-turbo"):
         """

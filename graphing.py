@@ -117,9 +117,9 @@ class DynamicPlot(tk.Tk):
         self.onResize()
         if self.newDataReady:
             color_map = {
-                0: '#22ff00',
-                25: '#77bb00', 
-                50: '#bb7700', 
+                0: '#00FF00',
+                25: '#66bb00', 
+                50: '#bb6600', 
                 95: '#FF0000'
             }
             self.newDataReady = False

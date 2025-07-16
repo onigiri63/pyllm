@@ -1,3 +1,4 @@
+import subprocess
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
@@ -8,6 +9,8 @@ from PIL import Image, ImageDraw, ImageFont
 import time
 from runFromFile import runFromFile
 from pyperclip import copy
+import docker
+
 # from markup import CodeSyntaxHighlighter
 
 '''
@@ -23,6 +26,7 @@ model = ('llama3.2_32k','llama3.2_32k', '16384')
 class LLMQueryUI:
     onlyCode = False
     def __init__(self):
+        self.check_docker_engine()
         self.events = []
         self.breakout = [False]
         self.onlyCode = False
@@ -30,16 +34,51 @@ class LLMQueryUI:
         self.query = llmQuery(model)
         self.initControls()
 
-    def on_configure(self):
+    def blockForDocker(self):
         while True:
-            state = self.root.state()
-            if state == "iconic":  # Minimized
-                self.minimize()
-            elif state == "zoomed":  # Maximized
-                self.maximize()
-            elif state == "normal":  # Restored
-                self.maximize()
-            time.sleep(.1)
+            try:
+                # Use 'docker ps -a' command to list all containers, including stopped ones
+                output = subprocess.check_output(['docker', 'ps', '-a'])
+                
+                # If the command is successful and returns a non-empty output, then Docker daemon is running
+                if 'CONTAINER ID' in output.decode('utf-8'):
+                    print("Docker daemon is running.")
+                    return True
+                
+                # If an error occurs or no output is returned, Docker daemon is not running
+                else:
+                    time.sleep(1)  # Wait before retrying
+                    continue
+        
+            except subprocess.CalledProcessError as e:
+                time.sleep(1)  # Wait before retrying
+                continue
+
+            except Exception as e:
+                time.sleep(1)  # Wait before retrying
+                continue
+
+    def check_docker_engine(self):
+        try:
+            print("Checking docker engine")
+            client = docker.from_env()
+            return True
+        except Exception as e:
+            print(f"Docker engine is not running, starting...")
+            self.startDockerEngine()
+            return False
+        
+    def startDockerEngine(self):
+         # Run the executable
+        result = subprocess.run([f'C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe', '-D'], shell=True)
+        self.blockForDocker()
+
+        # Check if the return code is 0 (success)
+        if result.returncode == 0:
+            print("Docker engine launched!")
+        else:
+            print(f"Error running docker, you must have docker engine installed to run this program.")
+            exit()
 
     def minimize(self):
         if self.minimized:
@@ -214,6 +253,17 @@ class LLMQueryUI:
 
     def copyCode(self):
         copy(self.output_text.get("1.0",tk.END))
+    
+    def on_configure(self):
+        while True:
+            state = self.root.state()
+            if state == "iconic":  # Minimized
+                self.minimize()
+            elif state == "zoomed":  # Maximized
+                self.maximize()
+            elif state == "normal":  # Restored
+                self.maximize()
+            time.sleep(.1)
 
 if __name__ == "__main__":
     llm_query_ui = LLMQueryUI()

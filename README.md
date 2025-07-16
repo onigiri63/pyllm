@@ -60,6 +60,20 @@ ollama pull <your model here>
 exit
 ```
 
+### Optional:  increase the context size for a net
+
+#### the input token limit for ollama seems to default to 2k - increasing this WILL increase memory demand!
+'''
+docker exec -u root -t -i ${container_id} /bin/bash
+ollama run <llm name>
+/set parameter num_ctx <your context size>
+/bye
+exit
+'''
+This will ONLY increase the context for the running container - if you want to permanently increase the length,
+follow the instructions below to create and store a permanent image.
+
+### Optional:  Store the altered model locally as a new image
 Now run the file createContainerImg.bat, make sure you record the file name.  Store the file in the downloaded repository folder ollama/models.
 FOR NOW, you can add the model to the tuple at the beginning of driver.py, in the format:
 ```
