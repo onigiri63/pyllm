@@ -63,13 +63,14 @@ exit
 ### Optional:  increase the context size for a net
 
 #### the input token limit for ollama seems to default to 2k - increasing this WILL increase memory demand!
-'''
+```
 docker exec -u root -t -i ${container_id} /bin/bash
 ollama run <llm name>
 /set parameter num_ctx <your context size>
 /bye
 exit
-'''
+```
+
 This will ONLY increase the context for the running container - if you want to permanently increase the length,
 follow the instructions below to create and store a permanent image.
 
