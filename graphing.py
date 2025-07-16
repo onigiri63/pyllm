@@ -1,4 +1,4 @@
-from time import time
+import time
 import numpy as np
 import matplotlib
 matplotlib.use('TkAgg')
@@ -53,7 +53,7 @@ class DynamicPlot(tk.Tk):
             thread.daemon = True 
             thread.start()
         self.minimize_event = threading.Event()
-
+        time.sleep(.2)  # Allow time for the threads to start
         self.update_data()
 
     def minimize(self):

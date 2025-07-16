@@ -51,7 +51,6 @@ Refresh the certificate store
 update-ca-certificates
 ```
 
-
 ### The following commands will load your container with your chosen model
 ```
 docker restart ${container_id}

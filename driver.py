@@ -70,7 +70,7 @@ class LLMQueryUI:
         
     def startDockerEngine(self):
          # Run the executable
-        result = subprocess.run([f'C:\\Program Files\\Docker\\Docker\\Docker Desktop.exe', '-D'], shell=True)
+        result = subprocess.run([f'%PROGRAMFILES%\\Docker\\Docker\\Docker Desktop.exe', '-D'], shell=True)
         self.blockForDocker()
 
         # Check if the return code is 0 (success)
