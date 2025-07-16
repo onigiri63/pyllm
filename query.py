@@ -90,7 +90,8 @@ class llmQuery():
         data = {
             "model": self.model[1],
             "prompt": payload + self.queryHeader,
-            "num_ctx": self.model[2]
+            "num_ctx": self.model[2],
+            "num_thread": 8
         }
 
         cmd = ['curl', url, '-d',json.dumps(data), '--no-progress-meter']
@@ -125,10 +126,10 @@ class llmQuery():
                             buffer = ''
                     except json.JSONDecodeError as e:
                         pass
-                time.sleep(.1)
+                time.sleep(.05)
         except:
             0
-            time.sleep(.1)
+            time.sleep(.05)
                 
         self.process.stdout.close
         self.process.wait()

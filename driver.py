@@ -55,6 +55,7 @@ class LLMQueryUI:
         # self.root.iconbitmap("iconTemplate@2x.gif")  # Set the icon for the window
         self.root.title("LLM Query Interface")
         self.root.geometry("1100x950")
+        self.root.minsize(1100, 300) # sets the minimum size of the root window
         self.customfont = {"family": "Courier", "size": 10, "weight": "normal"}
 
         tk.Label(self.root, font=("Courier", 12), text="Enter your query:").pack(pady=5)
