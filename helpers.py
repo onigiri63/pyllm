@@ -2,6 +2,8 @@ import subprocess
 import time
 from PIL import Image, ImageDraw, ImageFont
 import docker
+from flask import json
+import tiktoken
 
 def get_font_dims(font):
     # Create an image with a blank white background
@@ -32,15 +34,15 @@ def blockForDocker():
             
             # If an error occurs or no output is returned, Docker daemon is not running
             else:
-                time.sleep(1)  # Wait before retrying
+                time.sleep(1)
                 continue
     
         except subprocess.CalledProcessError as e:
-            time.sleep(1)  # Wait before retrying
+            time.sleep(1)
             continue
 
         except Exception as e:
-            time.sleep(1)  # Wait before retrying
+            time.sleep(1)
             continue
 
 def check_docker_engine():
@@ -53,14 +55,32 @@ def check_docker_engine():
         startDockerEngine()
         return False
     
-def startDockerEngine(self):
-        # Run the executable
+def startDockerEngine():
     result = subprocess.run([f'%PROGRAMFILES%\\Docker\\Docker\\Docker Desktop.exe', '-D'], shell=True)
     blockForDocker()
 
-    # Check if the return code is 0 (success)
     if result.returncode == 0:
         print("Docker engine launched!")
     else:
         print(f"Error running docker, you must have docker engine installed to run this program.")
         exit()
+
+def get_context_length(prompt, model_name="gpt-3.5-turbo"):
+    try:
+        enc = tiktoken.encoding_for_model(model_name)    
+    except KeyError:
+        print("Warning: Model not found. Using cl100k_base encoding.")
+        enc = tiktoken.get_encoding("100k_base")
+
+    tokens = enc.encode(prompt)
+    return len(tokens)
+
+def run_command(command, url, payload):
+    result = subprocess.Popen(
+        [command, url, '-d', payload, '--no-progress-meter'], 
+        stdout=subprocess.PIPE, 
+        stderr=subprocess.PIPE, 
+        text=True, 
+        bufsize=1,                  # Line-buffered
+        universal_newlines=True )
+    return [int(result.pid), result.stdout.read(), result.stderr.read()]

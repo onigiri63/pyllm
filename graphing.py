@@ -30,6 +30,12 @@ class DynamicPlot(tk.Tk):
         except ValueError :
             print(f'Error: calling dynamic plot function')
         self.incoming = 0
+        self.color_map = {
+            0: '#00FF00',
+            25: '#66bb00', 
+            50: '#bb6600', 
+            95: '#FF0000'
+        }
 
         fig, ax = plt.subplots()
         self.data = np.zeros(50)  # Initial data array with 50 zeros
@@ -116,12 +122,7 @@ class DynamicPlot(tk.Tk):
     def update_data(self):
         self.onResize()
         if self.newDataReady:
-            color_map = {
-                0: '#00FF00',
-                25: '#66bb00', 
-                50: '#bb6600', 
-                95: '#FF0000'
-            }
+
             self.newDataReady = False
             if len(self.data) > 50:
                 shifted_data = self.data[:len(self.data)-1]
@@ -134,7 +135,7 @@ class DynamicPlot(tk.Tk):
             x_vals = np.arange(len(self.data))
             y_vals = self.data
             self.plot.set_data(x_vals, y_vals)
-            self.plot.set_color(color_map.get(int(self.incoming // 25 * 25), 'red'))
+            self.plot.set_color(self.color_map.get(int(self.incoming // 25 * 25), 'red'))
             self.ax.relim()
             self.ax.autoscale_view()
             self.canvas.draw()
