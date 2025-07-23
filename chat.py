@@ -3,6 +3,7 @@ import subprocess
 import threading
 import time
 import helpers
+from objectTypes import Message
 
 '''
 This version is in progress:
@@ -19,7 +20,7 @@ class llmChat():
         self.queryInProgress = False
         self.queryHeader = ''
         self.messageLock = threading.Lock()
-        self.messages = []
+        self.messages = Message()
         self.process = any
     
     def queryStatus(self):
@@ -43,8 +44,8 @@ class llmChat():
             print(f"unable to stop process: {e}")
 
     def tokenCount(self):
-        count = 0
-        for message in  self.messages:
+        count = len(self.queryHeader)
+        for message in self.messages.getMessages():
             self.messageLock.acquire()
             count += helpers.get_context_length(message['content'])
             self.messageLock.release()
@@ -52,10 +53,11 @@ class llmChat():
 
     def send_chat(self, payload, callback):
         self.messageLock.acquire()
-        self.messages.append({ "role": "user", "content": payload })
+        self.messages.addMessage("user",payload )
         self.messageLock.release()
 
-        command = { "model": self.model[1], "messages": self.messages }
+        command = { "model": self.model[1], "messages": self.messages.getMessages() }
+        # print(json.dumps(command))
         cmd = ['curl', chatURL, '-d',json.dumps(command), '--no-progress-meter']
         self.queryInProgress = True
         buffer = ''
@@ -85,7 +87,7 @@ class llmChat():
             0
             time.sleep(.05)
         self.messageLock.acquire()
-        self.messages.append({ "role": "assistant", "content":buffer })
+        self.messages.addMessage("assistant", buffer )
         self.messageLock.release()
         
         self.queryInProgress = False

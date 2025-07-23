@@ -8,6 +8,7 @@ import helpers
 import time
 from runFromFile import runFromFile
 from pyperclip import copy
+from ChatHistory import saveHistory
 # from markup import CodeSyntaxHighlighter
 
 '''
@@ -20,14 +21,18 @@ from pyperclip import copy
 # model = ('qwen2-32k','qwen2-32k', '2048')
 model = ('llama3.2_32k','llama3.2_32k', '16384')
 
+saveDirectory = f'C:\\Users\\shika001\\Documents\\ChatHistory'
+
 class LLMQueryUI:
     onlyCode = False
     def __init__(self):
         helpers.check_docker_engine()
+        self.savehistory = saveHistory(saveDirectory)
         self.events = []
         self.breakout = [False]
         self.onlyCode = False
         self.minimized = False
+        self.queryStatus = False
         self.chat = llmChat(model)
         self.initControls()
         runFromFile(model).launch()
@@ -57,35 +62,58 @@ class LLMQueryUI:
         self.root = tk.Tk()
         # self.root.iconbitmap("iconTemplate@2x.gif")  # Set the icon for the window
         self.root.title("LLM Query Interface")
-        self.root.geometry("1100x950")
+        self.root.geometry("1300x950")
         self.root.minsize(1100, 300) # sets the minimum size of the root window
         self.customfont = {"family": "Courier", "size": 10, "weight": "normal"}
 
         tk.Label(self.root, font=("Courier", 12), text="Enter your query:").pack(pady=5)
 
-        self.entry = scrolledtext.ScrolledText(self.root, width=100, height=25, wrap=tk.WORD, font=("Courier", 10))
-        self.entry.pack(pady=0, anchor=tk.NW)
+        self.outerFrame = tk.Frame(self.root    , width=1100, height=950)
+        self.outerFrame.pack(anchor=tk.NW, expand=True)
+        self.outerFrame.columnconfigure(0, minsize=100)
+        self.outerFrame.columnconfigure(1, weight=2)
+        self.outerFrame.columnconfigure(2, weight=1, minsize=210)
+
+        self.outerGrid = tk.Frame(self.outerFrame)
+        self.outerGrid.grid(row=0, column=0, columnspan=2, padx=0, pady=0)
+
+        self.chatHistoryColumn = tk.Frame(self.outerGrid, width=100, height=500)
+        self.chatHistoryColumn.grid(column=0, row=0, sticky='nw', rowspan=100)
+
+        chathist = self.savehistory.enumerateChats()
+        index = 0
+        for chat in chathist:
+            self.fakeChatHistoryButton = tk.Button(self.chatHistoryColumn, bg="snow3", width=10, height=1, text=chat, font=("Courier", 10), command=self.loadButtonClick(chat))
+            self.fakeChatHistoryButton.grid(row=index, column=0, sticky="nsew")
+            self.chatHistoryColumn.rowconfigure(index, weight=0)
+            index += 1
+
+        self.entry = scrolledtext.ScrolledText(self.outerGrid, width=40, height=25, wrap=tk.WORD, font=("Courier", 10))
+        self.entry.grid(row=0, column=1)
         self.events.append((self.customfont,self.entry))
         
-        self.frame = tk.Frame(self.root, height=1)
-        self.frame.pack(padx=0, pady=0, fill=tk.BOTH, anchor=tk.NW)
-        self.button_frame = tk.Frame(self.frame, relief=tk.RIDGE, height=1)
-        self.button_frame.grid(row=0, column=0, columnspan=4, padx=10, pady=0)
+        self.buttonFrame = tk.Frame(self.outerGrid, height=1)
+        self.buttonFrame.grid(row=1, column=1, sticky="w")
+        self.buttonGrid = tk.Frame(self.buttonFrame, relief=tk.RIDGE, height=1)
+        self.buttonGrid.grid(row=0, column=0, columnspan=4, padx=10, pady=0)
 
-        self.runButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Run Query", font=("Courier", 10), command=self.on_button_click)
+        self.runButton = tk.Button(self.buttonGrid, bg="snow3", width=17, height=1, text="Run Query", font=("Courier", 10), command=self.on_button_click)
         self.runButton.grid(row=0, column=0, sticky="nsew")
-        self.stopButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Stop Query", font=("Courier", 10), command=self.stopLLM)
+        self.stopButton = tk.Button(self.buttonGrid, bg="snow3", width=17, height=1, text="Stop Query", font=("Courier", 10), command=self.stopLLM)
         self.stopButton.grid(row=0, column=1, sticky="nsew")
-        self.codeButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="CODE OFF", font=("Courier", 10), command=self.codeOnly)
+        self.codeButton = tk.Button(self.buttonGrid, bg="snow3", width=17, height=1, text="CODE OFF", font=("Courier", 10), command=self.codeOnly)
         self.codeButton.grid(row=0, column=2, sticky="nsew")
-        self.copyButton = tk.Button(self.button_frame, bg="snow3", width=17, height=1, text="Paste Buffer", font=("Courier", 10), command=self.copyCode)
+        self.copyButton = tk.Button(self.buttonGrid, bg="snow3", width=17, height=1, text="Paste Buffer", font=("Courier", 10), command=self.copyCode)
         self.copyButton.grid(row=0, column=3, sticky="nsew")
-        self.countLabel = tk.Label(self.button_frame, font=("Courier", 10), height=1, text="context length: 0")
+        self.countLabel = tk.Label(self.buttonGrid, font=("Courier", 10), height=1, text="context length: 0")
         self.countLabel.grid(row=0, column=4, sticky="nsew")
 
-        self.output_text = scrolledtext.ScrolledText(self.root, width=100, height=27, wrap=tk.WORD, font=("Courier", 10))
-        self.output_text.pack(pady=0, anchor=tk.NW, fill=tk.Y, expand=True)
+        self.output_text = scrolledtext.ScrolledText(self.outerGrid, width=40, height=27, wrap=tk.WORD, font=("Courier", 10))
+        self.output_text.grid(row=2, column=1)
         self.events.append( (self.customfont, self.output_text))
+
+        self.rightBufferColumn = tk.Frame(self.outerGrid, width=200, height=500)
+        self.rightBufferColumn.grid(row=0, column=2, sticky='ne', rowspan=100)
         
         cpuoffsetX = 600
         cpuoffsetY = 0
@@ -112,17 +140,28 @@ class LLMQueryUI:
         thread = threading.Thread(target=self.runQuery,args=([user_input, self.responseCallback]))
         thread.start()
 
+    def loadButtonClick(self, chatname):
+        chat = self.savehistory.loadChat(chatname)
+        print(chat)
+
     def buttonStatus(self, breakout):
         while not breakout[0]:
             if self.chat.queryInProgress:
-                self.runButton.config(bg="green", text="Query In Progress")
+                if not self.queryStatus:
+                    self.queryStatus = True
+                    self.runButton.config(bg="green", text="Query In Progress")
             else:
-                self.runButton.config(bg="snow3", text="Run Query")
-            time.sleep(0.5)
+                if self.queryStatus:
+                    self.queryStatus = False
+                    self.runButton.config(bg="snow3", text="Run Query")
+                    input = self.entry.get("1.0",tk.END)
+                    output = self.output_text.get("1.0", tk.END)
+                    self.savehistory.addMessage(input, 'user')
+                    self.savehistory.addMessage(output, 'assistant')
+            time.sleep(0.1)
 
     def runQuery(self, user_input, callback):
         self.output_text.delete(1.0, tk.END)  # Clear any text
-        self.chat.setQueryHeader(self.onlyCode)
         self.chat.send_chat(user_input.strip(), callback)
         
     def responseCallback(self, responses):
@@ -189,6 +228,7 @@ class LLMQueryUI:
     def codeOnly(self):
         self.onlyCode = not self.onlyCode
         if self.onlyCode:
+            self.chat.setQueryHeader(self.onlyCode)
             self.codeButton.config(bg="green", text="CODE ON")
         else:
             self.codeButton.config(bg="snow3", text="CODE OFF")

@@ -148,10 +148,10 @@ class DynamicPlot(tk.Tk):
         self.newDataReady = True
 
     def updatePosition(self,offsetX, offsetY, baseX, baseY, baseH):
-        width = 220
+        width = 180
         height = int(baseH / 2) - 20
-        x = baseX + 20 + offsetX
-        y = baseY + 20 + offsetY
+        x = baseX + 60 + offsetX
+        y = baseY + offsetY
 
         def reposition():
             self.geometry(f"{width}x{height}+{x}+{y}")
