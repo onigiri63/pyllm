@@ -3,10 +3,10 @@ import time
 
 from flask import json
 
-class saveHistory:
+class chatHistory:
     def __init__(self, savedir):
         self.savedir = savedir
-        self.created = str(time.time()).split('.')[0]
+        self.created = str(time.time())
         self.filename = f"{self.savedir}\\{self.created}"
         self.startSave()
     
@@ -26,16 +26,13 @@ class saveHistory:
     def addMessage(self, message, role):
         try:
             fa = open(self.filename,'r')
-            read = fa.read()
+            curContent = json.loads(fa.read())
             fa.close()
-            curContent = json.loads(read)
 
             f = open(self.filename, "w")
-            outmessage = message.replace("\"","\"").replace('\n','\\n')
-            comma = ''
-            if len(curContent['messages']) > 0:
-                comma = ','
-            newMessage = comma + '{' + f"\"role\": \"{role}\", \"content\": \"{outmessage}\"" + '}'
+            # outmessage = message.replace("\"","\"").replace('\n','\\n').replace(',','\,')
+            outmessage = json.dumps(message, ensure_ascii=False).replace('\n', '\\n')
+            newMessage = '{' + f"\"role\": \"{role}\", \"content\": {outmessage}" + '}'
             curContent['messages'].append(newMessage)
             f.write(json.dumps(curContent))
             f.close()
@@ -47,7 +44,7 @@ class saveHistory:
     def loadChat(self, filename):
         file = open(f"{self.savedir}\\{filename}", "r").read()
         myjson = json.loads(file)
-        ret = [myjson['messages']]
+        ret = myjson['messages']
         return ret
     
     def enumerateChats(self):

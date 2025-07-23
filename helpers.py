@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 import docker
 from flask import json
 import tiktoken
+import datetime
 
 def get_font_dims(font):
     # Create an image with a blank white background
@@ -84,3 +85,9 @@ def run_command(command, url, payload):
         bufsize=1,                  # Line-buffered
         universal_newlines=True )
     return [int(result.pid), result.stdout.read(), result.stderr.read()]
+
+def convert_unix_to_date(unix_time):
+    # Convert Unix time to seconds since the epoch, then calculate days, hours, minutes, seconds
+    timestamp = datetime.datetime.fromtimestamp(unix_time)
+    
+    return timestamp.strftime('%d-%m-%Y, %H:%M:%S')

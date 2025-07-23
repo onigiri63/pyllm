@@ -3,7 +3,7 @@ import subprocess
 import threading
 import time
 import helpers
-from objectTypes import Message
+from objectTypes import MessageList
 
 '''
 This version is in progress:
@@ -20,7 +20,7 @@ class llmChat():
         self.queryInProgress = False
         self.queryHeader = ''
         self.messageLock = threading.Lock()
-        self.messages = Message()
+        self.messages = MessageList()
         self.process = any
     
     def queryStatus(self):
@@ -91,3 +91,6 @@ class llmChat():
         self.messageLock.release()
         
         self.queryInProgress = False
+
+    def loadMessage(self, role, message):
+        self.messages.addMessage(role, message)

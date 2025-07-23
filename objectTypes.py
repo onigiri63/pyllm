@@ -1,7 +1,7 @@
 import time
 from flask import json
 
-class Message():
+class MessageList():
     def __init__(self):
         self.created = time.time()
         self.messages = []

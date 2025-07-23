@@ -1,6 +1,8 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
+
+from flask import json
 from chat import llmChat
 from graphing import DynamicPlot
 import sys
@@ -8,7 +10,7 @@ import helpers
 import time
 from runFromFile import runFromFile
 from pyperclip import copy
-from ChatHistory import saveHistory
+from ChatHistory import chatHistory
 # from markup import CodeSyntaxHighlighter
 
 '''
@@ -27,7 +29,7 @@ class LLMQueryUI:
     onlyCode = False
     def __init__(self):
         helpers.check_docker_engine()
-        self.savehistory = saveHistory(saveDirectory)
+        self.savehistory = chatHistory(saveDirectory)
         self.events = []
         self.breakout = [False]
         self.onlyCode = False
@@ -68,11 +70,11 @@ class LLMQueryUI:
 
         tk.Label(self.root, font=("Courier", 12), text="Enter your query:").pack(pady=5)
 
-        self.outerFrame = tk.Frame(self.root    , width=1100, height=950)
+        self.outerFrame = tk.Frame(self.root, width=1100, height=950)
         self.outerFrame.pack(anchor=tk.NW, expand=True)
         self.outerFrame.columnconfigure(0, minsize=100)
         self.outerFrame.columnconfigure(1, weight=2)
-        self.outerFrame.columnconfigure(2, weight=1, minsize=210)
+        self.outerFrame.columnconfigure(2, weight=10, minsize=210)
 
         self.outerGrid = tk.Frame(self.outerFrame)
         self.outerGrid.grid(row=0, column=0, columnspan=2, padx=0, pady=0)
@@ -83,13 +85,13 @@ class LLMQueryUI:
         chathist = self.savehistory.enumerateChats()
         index = 0
         for chat in chathist:
-            self.fakeChatHistoryButton = tk.Button(self.chatHistoryColumn, bg="snow3", width=10, height=1, text=chat, font=("Courier", 10), command=self.loadButtonClick(chat))
-            self.fakeChatHistoryButton.grid(row=index, column=0, sticky="nsew")
+            button = tk.Button(self.chatHistoryColumn, bg="snow3", width=20, height=1, text=helpers.convert_unix_to_date(float(chat)), font=("Courier", 10), command=lambda chat=chat: self.loadButtonClick(chat))
+            button.grid(row=index, column=0, sticky="nsew")
             self.chatHistoryColumn.rowconfigure(index, weight=0)
             index += 1
 
-        self.entry = scrolledtext.ScrolledText(self.outerGrid, width=40, height=25, wrap=tk.WORD, font=("Courier", 10))
-        self.entry.grid(row=0, column=1)
+        self.entry = scrolledtext.ScrolledText(self.outerGrid, width=100, height=25, wrap=tk.WORD, font=("Courier", 10))
+        self.entry.grid(row=0, column=1, sticky='nw')
         self.events.append((self.customfont,self.entry))
         
         self.buttonFrame = tk.Frame(self.outerGrid, height=1)
@@ -109,19 +111,14 @@ class LLMQueryUI:
         self.countLabel.grid(row=0, column=4, sticky="nsew")
 
         self.output_text = scrolledtext.ScrolledText(self.outerGrid, width=40, height=27, wrap=tk.WORD, font=("Courier", 10))
-        self.output_text.grid(row=2, column=1)
+        self.output_text.grid(row=2, column=1, sticky='nw')
         self.events.append( (self.customfont, self.output_text))
 
         self.rightBufferColumn = tk.Frame(self.outerGrid, width=200, height=500)
         self.rightBufferColumn.grid(row=0, column=2, sticky='ne', rowspan=100)
         
-        cpuoffsetX = 600
-        cpuoffsetY = 0
-        self.cpuplot = DynamicPlot('CPU % Usage', '0', '100', cpuoffsetX, cpuoffsetY, self.root, self.breakout)
-
-        memoffsetX = 0
-        memoffsetY = 300
-        self.memplot = DynamicPlot('Memory % Usage', '0', '100', memoffsetX, memoffsetY, self.root, self.breakout)
+        self.cpuplot = DynamicPlot('CPU % Usage', '0', '100', 600, 0, self.root, self.breakout)
+        self.memplot = DynamicPlot('Memory % Usage', '0', '100', 0, 300, self.root, self.breakout)
 
         tokenThread = threading.Thread(target=self.tokenCounterThread, args = ([self.tokenCallBack]))
         tokenThread.daemon = True  # Ensure the thread exits when the main program exits
@@ -142,7 +139,18 @@ class LLMQueryUI:
 
     def loadButtonClick(self, chatname):
         chat = self.savehistory.loadChat(chatname)
-        print(chat)
+        if chat is not None and len(chat) > 0:
+            self.entry.delete(1.0, tk.END)
+            self.output_text.delete(1.0, tk.END)
+            for message in chat:
+                role = json.loads(message)['role']
+                content = json.loads(message)['content']
+                if role == 'user':
+                    self.chat.loadMessage('user', content)
+                    self.entry.insert(tk.END, content) 
+                elif role == 'assistant':
+                    self.chat.loadMessage('assistant', content)
+                    self.output_text.insert(tk.END, content)
 
     def buttonStatus(self, breakout):
         while not breakout[0]:
@@ -183,7 +191,7 @@ class LLMQueryUI:
             print(f"Error during closing: {e}")
 
     def resize_textboxes(self, font, control):
-        text_width = int( (self.root.winfo_width() - 250) / (helpers.get_font_dims(font)[0] + 2) )
+        text_width = int( (self.root.winfo_width() - 450) / (helpers.get_font_dims(font)[0] + 2) )
         text_height = int( self.root.winfo_height() / (6 * helpers.get_font_dims(font)[1]) )
         
         control.config(width=text_width, height=text_height)
