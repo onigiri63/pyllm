@@ -57,7 +57,7 @@ def check_docker_engine():
         return False
     
 def startDockerEngine():
-    result = subprocess.run([f'%PROGRAMFILES%\\Docker\\Docker\\Docker Desktop.exe', '-D'], shell=True)
+    result = subprocess.run([f'%PROGRAMFILES%/Docker/Docker/Docker Desktop.exe', '-D'], shell=True)
     blockForDocker()
 
     if result.returncode == 0:

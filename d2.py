@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import scrolledtext
 import threading
+import os
 
 from flask import json
 from chat import llmChat
@@ -21,14 +22,18 @@ from ChatHistory import chatHistory
 # model = ('qwen2.5coder','qwen2.5-coder:7b', '2048')
 # model = ('qwen2.5coder3b','qwen2.5-coder:3b', '2048')
 # model = ('qwen2-32k','qwen2-32k', '2048')
-model = ('llama3.2_32k','llama3.2_32k', '16384')
+# model = ('llama3.2_32k','llama3.2_32k', '16384')
+model = ('llama3.2','llama3.2','2048')
 
-saveDirectory = f'C:\\Users\\shika001\\Documents\\ChatHistory'
+# saveDirectory = f'C:\\Users\\shika001\\Documents\\ChatHistory'
+saveDirectory = f'./ChatHistory'
 
 class LLMQueryUI:
     onlyCode = False
     def __init__(self):
         helpers.check_docker_engine()
+        if not os.path.exists(saveDirectory):
+            os.mkdir(saveDirectory)
         self.savehistory = chatHistory(saveDirectory)
         self.events = []
         self.breakout = [False]
@@ -47,15 +52,15 @@ class LLMQueryUI:
         if self.minimized:
             return
         self.minimized = True
-        self.cpuplot.minimize()
-        self.memplot.minimize()
+        # self.cpuplot.minimize()
+        # self.memplot.minimize()
     
     def maximize(self):
         if not self.minimized:
             return
         self.minimized = False
-        self.cpuplot.maximize()
-        self.memplot.maximize()
+        # self.cpuplot.maximize()
+        # self.memplot.maximize()
 
     def stopLLM(self):
         self.chat.stopGeneration()
@@ -117,8 +122,8 @@ class LLMQueryUI:
         self.rightBufferColumn = tk.Frame(self.outerGrid, width=200, height=500)
         self.rightBufferColumn.grid(row=0, column=2, sticky='ne', rowspan=100)
         
-        self.cpuplot = DynamicPlot('CPU % Usage', '0', '100', 600, 0, self.root, self.breakout)
-        self.memplot = DynamicPlot('Memory % Usage', '0', '100', 0, 300, self.root, self.breakout)
+        # self.cpuplot = DynamicPlot('CPU % Usage', '0', '100', 600, 0, self.root, self.breakout)
+        # self.memplot = DynamicPlot('Memory % Usage', '0', '100', 0, 300, self.root, self.breakout)
 
         tokenThread = threading.Thread(target=self.tokenCounterThread, args = ([self.tokenCallBack]))
         tokenThread.daemon = True  # Ensure the thread exits when the main program exits
@@ -127,9 +132,9 @@ class LLMQueryUI:
         self.root.bind("<Configure>", lambda event:self.bindResize(event))
         self.root.protocol("WM_DELETE_WINDOW", lambda: self.onclosing(self.onclosing(self.breakout)))
 
-        resizeThread = threading.Thread(target=self.on_configure )
-        resizeThread.daemon = True
-        resizeThread.start()
+        # resizeThread = threading.Thread(target=self.on_configure )
+        # resizeThread.daemon = True
+        # resizeThread.start()
 
     def on_button_click(self):
         # Reading the text from the input field
@@ -182,17 +187,19 @@ class LLMQueryUI:
         try:
             if self.root is not None:
                 self.root.destroy()
-            if self.cpuplot is not None:
-                self.cpuplot.destroy()
-            if self.memplot is not None:
-                self.memplot.destroy()
+            # if self.cpuplot is not None:
+            #     self.cpuplot.destroy()
+            # if self.memplot is not None:
+            #     self.memplot.destroy()
             sys.exit()
         except Exception as e:
             print(f"Error during closing: {e}")
 
     def resize_textboxes(self, font, control):
-        text_width = int( (self.root.winfo_width() - 450) / (helpers.get_font_dims(font)[0] + 2) )
-        text_height = int( self.root.winfo_height() / (6 * helpers.get_font_dims(font)[1]) )
+        # text_width = int( (self.root.winfo_width() - 450) / (helpers.get_font_dims(font)[0] + 2) )
+        # text_height = int( self.root.winfo_height() / (6 * helpers.get_font_dims(font)[1]) )
+        text_width = 120
+        text_height = 33
         
         control.config(width=text_width, height=text_height)
 
@@ -207,12 +214,12 @@ class LLMQueryUI:
 
         cpuoffsetX = root_w - 250
         cpuoffsetY = 20
-        self.cpuplot.updatePosition(cpuoffsetX, cpuoffsetY, root_x, root_y, root_h)
-        self.cpuplot.after(10, self.cpuplot.lift)
+        # self.cpuplot.updatePosition(cpuoffsetX, cpuoffsetY, root_x, root_y, root_h)
+        # self.cpuplot.after(10, self.cpuplot.lift)
         memoffsetX = root_w - 250
         memoffsetY = int(root_h / 2)
-        self.memplot.updatePosition(memoffsetX, memoffsetY, root_x, root_y, root_h)
-        self.memplot.after(10,self.memplot.lift)
+        # self.memplot.updatePosition(memoffsetX, memoffsetY, root_x, root_y, root_h)
+        # self.memplot.after(10,self.memplot.lift)
 
     def tokenCounterThread(self, callback):
         oldcount = 0

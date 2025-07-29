@@ -42,7 +42,7 @@ class runFromFile():
     def run_container(self):
         print(f'launching container')
         try:
-            self.run_command(['docker', 'run', '-p', '11434:11434', '-d', self.model[0]] )
+            self.run_command(['docker', 'run', '-p', '11434:11434', '--memory=\"6g\"' '-d', self.model[0]] )
             # self.run_command(['docker', 'run', '--memory=\"16g\"', '--shm-size=\"16g\"','-p', '11434:11434', '-d', self.model[0]] )
         except subprocess.CalledProcessError as e:
             print(f"Failed to run Docker container: {e}")
