@@ -17,8 +17,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
+@REM echo Saving to: %cd%\%FILENAME%.tar
+
 :: Save the image as a tar file
-docker save -o %FILENAME%.tar %IMAGE_TAG%
+docker save -o "%FILENAME%.tar" %IMAGE_TAG%
 if errorlevel 1 (
     echo Failed to save image. Exiting.
     exit /b 1

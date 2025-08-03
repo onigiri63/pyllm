@@ -1,5 +1,6 @@
 import os
 import time
+import helpers
 
 from flask import json
 
@@ -8,8 +9,9 @@ class chatHistory:
         self.savedir = savedir
         self.created = str(time.time())
         self.filename = f"{self.savedir}\\{self.created}"
+        helpers.createDirectory(savedir)
         self.startSave()
-    
+
     def startSave(self):
         output = ''
         try:

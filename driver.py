@@ -18,7 +18,9 @@ from pyperclip import copy
 # model = ('qwen2.5coder','qwen2.5-coder:7b', '2048')
 # model = ('qwen2.5coder3b','qwen2.5-coder:3b', '2048')
 # model = ('qwen2-32k','qwen2-32k', '2048')
-model = ('llama3.2_32k','llama3.2_32k', '16384')
+# model = ('llama3.2_32k','llama3.2_32k', '16384')
+model = ('llama3.2','llama3.2', '2048')
+
 
 class LLMQueryUI:
     onlyCode = False

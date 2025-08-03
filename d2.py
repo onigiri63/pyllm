@@ -18,12 +18,21 @@ from ChatHistory import chatHistory
     -add a dropdown to select the model to run
 '''
 # format: file name, model name, context window size
+# File names are different due to special characters like :, these must be removed to create the file
+
 # model = ('qwen2.5coder','qwen2.5-coder:7b', '2048')
 # model = ('qwen2.5coder3b','qwen2.5-coder:3b', '2048')
 # model = ('qwen2-32k','qwen2-32k', '2048')
-model = ('llama3.2_32k','llama3.2_32k', '16384')
+# model = ('llama3.2_32k','llama3.2_32k', '16384')
+model = ('llama3.2','llama3.2', '2048')
+# model = ('deepseek-coder-v216b','deepseek-coder-v2:16b','2048')
 
-saveDirectory = f'C:\\Users\\shika001\\Documents\\ChatHistory'
+# UPDATE your save directory to a path = eg 
+
+
+print(f'Chat history will be saved to {helpers.getUserHomeDir()}\\ChatHistory')
+# input()
+saveDirectory = f'{helpers.getUserHomeDir()}\\ChatHistory'
 
 class LLMQueryUI:
     onlyCode = False
@@ -41,6 +50,7 @@ class LLMQueryUI:
         buttonthread = threading.Thread(target=self.buttonStatus, args=([self.breakout]))
         buttonthread.daemon = True
         buttonthread.start()
+        # self.initLLM()
         self.root.mainloop()
 
     def minimize(self):
@@ -171,6 +181,10 @@ class LLMQueryUI:
     def runQuery(self, user_input, callback):
         self.output_text.delete(1.0, tk.END)  # Clear any text
         self.chat.send_chat(user_input.strip(), callback)
+
+    def initLLM(self):
+        self.output_text.delete(1.0, tk.END)  # Clear any text
+        self.chat.send_instruction(f"/set PARAMETER num_ctx:{model[2]}")
         
     def responseCallback(self, responses):
         self.output_text.insert(tk.END, responses) 

@@ -92,5 +92,13 @@ class llmChat():
         
         self.queryInProgress = False
 
+    def send_instruction(self, payload):
+        command = { "model": self.model[1], "messages": payload }
+        cmd = ['curl', chatURL, '-d',json.dumps(command), '--no-progress-meter']
+        self.queryInProgress = True
+        buffer = ''
+        self.process = subprocess.Popen(
+        cmd)
+
     def loadMessage(self, role, message):
         self.messages.addMessage(role, message)

@@ -1,3 +1,5 @@
+import os
+from pathlib import Path
 import subprocess
 import time
 from PIL import Image, ImageDraw, ImageFont
@@ -91,3 +93,11 @@ def convert_unix_to_date(unix_time):
     timestamp = datetime.datetime.fromtimestamp(unix_time)
     
     return timestamp.strftime('%d-%m-%Y, %H:%M:%S')
+
+def getUserHomeDir():
+    return Path.home()
+
+    
+def createDirectory(savedir):
+    if not os.path.exists(savedir):
+        os.mkdir(savedir)
