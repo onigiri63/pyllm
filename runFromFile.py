@@ -1,8 +1,9 @@
 import subprocess
 
 class runFromFile():
-    def __init__(self, model):
+    def __init__(self, model, imageStoreDirectory):
         self.model = model
+        self.imageStoreDirectory = imageStoreDirectory
 
     def kill_existing_containers(self):
         self.run_command(['docker', 'container', 'prune', '-f'])
@@ -22,9 +23,9 @@ class runFromFile():
 
     # Load the Docker image if it does not exist locally
     def load_image(self):
-        print(f'loading docker image from file {self.model[0]}.tar.  This might take a while on the first run, please be patient!')
+        print(f'loading docker image from file {self.imageStoreDirectory}\\{self.model[0]}.tar.  This might take a while on the first run, please be patient!')
         try:
-            self.run_command(['docker', 'load', '-i', f'models/{self.model[0]}' + ".tar"])
+            self.run_command(['docker', 'load', '-i', f'{self.imageStoreDirectory}\\{self.model[0]}' + ".tar"])
             print("Docker image loaded successfully.")
             return 0
         except subprocess.CalledProcessError as e:
@@ -42,8 +43,7 @@ class runFromFile():
     def run_container(self):
         print(f'launching container')
         try:
-            self.run_command(['docker', 'run', '-p', '11434:11434', '-d', self.model[0]] )
-            # self.run_command(['docker', 'run', '--memory=\"16g\"', '--shm-size=\"16g\"','-p', '11434:11434', '-d', self.model[0]] )
+            self.run_command(['docker', 'run', '-p', '11434:11434', '-d', self.model[0]])
         except subprocess.CalledProcessError as e:
             print(f"Failed to run Docker container: {e}")
             return -1
@@ -60,7 +60,3 @@ class runFromFile():
             self.run_container()
         else:
             print("Container is already running, using existing container.")
-
-if __name__ == "__main__":
-    run = runFromFile('qwen2.5.coder')
-    run.launch()

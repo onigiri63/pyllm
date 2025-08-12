@@ -21,9 +21,11 @@ from ChatHistory import chatHistory
 # model = ('qwen2.5coder','qwen2.5-coder:7b', '2048')
 # model = ('qwen2.5coder3b','qwen2.5-coder:3b', '2048')
 # model = ('qwen2-32k','qwen2-32k', '2048')
-model = ('llama3.2_32k','llama3.2_32k', '16384')
+# model = ('llama3.2','llama3.2', '2048')
+model = ('llama3.2-16k','llama3.2-16k', '16384')
 
 saveDirectory = f'C:\\Users\\shika001\\Documents\\ChatHistory'
+imageStoreDirectory = f'M:\\Jeff_Shikany\\ollama\\models'
 
 class LLMQueryUI:
     onlyCode = False
@@ -37,7 +39,7 @@ class LLMQueryUI:
         self.queryStatus = False
         self.chat = llmChat(model)
         self.initControls()
-        runFromFile(model).launch()
+        runFromFile(model, imageStoreDirectory).launch()
         buttonthread = threading.Thread(target=self.buttonStatus, args=([self.breakout]))
         buttonthread.daemon = True
         buttonthread.start()
@@ -125,7 +127,7 @@ class LLMQueryUI:
         tokenThread.start()
 
         self.root.bind("<Configure>", lambda event:self.bindResize(event))
-        self.root.protocol("WM_DELETE_WINDOW", lambda: self.onclosing(self.onclosing(self.breakout)))
+        self.root.protocol("WM_DELETE_WINDOW", lambda: self.onclosing(self.breakout))
 
         resizeThread = threading.Thread(target=self.on_configure )
         resizeThread.daemon = True

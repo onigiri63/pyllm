@@ -68,23 +68,24 @@ class llmChat():
         text=True, 
         bufsize=1,
         universal_newlines=True )
-
         try:
             for line in self.process.stdout:
                 line = line.strip()
+                print(line)
                 try:
                     parsed = json.loads(line)
                     if 'done' in parsed:
                         if parsed['done'] == 'true':
                             break
                     if 'message' in parsed:
+                        print(parsed['message']['content'])
                         callback(parsed['message']['content'])
                         buffer += parsed['message']['content']
                 except json.JSONDecodeError as e:
-                    0
+                    pass
                 time.sleep(.05)
         except:
-            0
+            pass
             time.sleep(.05)
         self.messageLock.acquire()
         self.messages.addMessage("assistant", buffer )
